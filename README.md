@@ -230,7 +230,7 @@ erDiagram
 ### 1. Clone & Setup Environment
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/ryadevx/event-flow
 cd even
 cp .env.example .env
 pnpm install
