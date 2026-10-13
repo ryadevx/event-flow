@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789568217512,
+      "tag": "0000_wide_christian_walker",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789624655648,
+      "tag": "0001_glorious_hemingway",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789650549328,
+      "tag": "0002_tan_wilson_fisk",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789654368800,
+      "tag": "0003_graceful_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790255418107,
+      "tag": "0004_puzzling_lyja",
+      "breakpoints": true
+    }
+  ]
+}

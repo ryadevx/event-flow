@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Production and build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage and test artifacts
+coverage/
+*.lcov
+.nyc_output/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files & internal audit notes
+tmp/
+temp/
+ANTIGRAVITY.md
+6octfile.md
+ANTIGRAVITY_AUDIT.md
+ANTIGRAVITY_VERIFICATION.md
+ARCHITECTURE_AUDIT_AND_ACTION_PLAN.md
+CONVERSATION_HISTORY_AUDIT.md
+FIX_PLAN.md
+FULL_DISCUSSION_YESTERDAY.md
+KAFKA_FIXES_K1_K6.md
+NEW_ANTIGRAVITY_AUDIT.md
+OPENCOD_SUMMARY.md
+PORTFOLIO_ASSESSMENT_AND_ROADMAP.md
+PREVIOUS_CONVERSATION.md
+PROJECT_REVIEW_AND_ROADMAP.md
+RACE_CONDITION_FIXES_R1_R7.md
+SECURITY_FIXES_C1_C7.md
+antvgreview.md
+opencode-audit.md

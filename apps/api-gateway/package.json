@@ -1,0 +1,23 @@
+{
+  "name": "@event-ticketing/api-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "oxlint \"src/**/*.ts\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:e2e": "jest --config ./test/jest-e2e.json"
+  },
+  "dependencies": {
+    "@event-ticketing/shared": "workspace:*",
+    "@nestjs/axios": "^12.0.1",
+    "@nestjs/jwt": "^12.0.1",
+    "dotenv": "^17.4.2"
+  }
+}

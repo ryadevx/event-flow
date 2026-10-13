@@ -1,0 +1,163 @@
+services:
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: event-ticketing-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redpanda:
+    image: redpandadata/redpanda:v25.2.1
+    container_name: event-ticketing-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:9092
+
+  migrations:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.migrations
+    container_name: event-ticketing-migrations
+    environment:
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL}
+      EVENTS_DATABASE_URL: ${EVENTS_DATABASE_URL}
+      TICKETS_DATABASE_URL: ${TICKETS_DATABASE_URL}
+      NOTIFICATIONS_DATABASE_URL: ${NOTIFICATIONS_DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  auth:
+    build:
+      context: ..
+      dockerfile: apps/auth/Dockerfile
+    container_name: event-ticketing-auth
+    environment:
+      PORT: 3001
+      DATABASE_URL: ${AUTH_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      KAFKA_CLIENT_ID: auth-service
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD}
+      KAFKA_SASL_MECHANISM: SCRAM-SHA-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+
+  events:
+    build:
+      context: ..
+      dockerfile: apps/events/Dockerfile
+    container_name: event-ticketing-events
+    environment:
+      PORT: 3002
+      DATABASE_URL: ${EVENTS_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      KAFKA_CLIENT_ID: events-service
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD}
+      KAFKA_SASL_MECHANISM: SCRAM-SHA-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+
+  tickets:
+    build:
+      context: ..
+      dockerfile: apps/tickets/Dockerfile
+    container_name: event-ticketing-tickets
+    environment:
+      PORT: 3003
+      DATABASE_URL: ${TICKETS_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      KAFKA_CLIENT_ID: tickets-service
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD}
+      KAFKA_SASL_MECHANISM: SCRAM-SHA-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+
+  notifications:
+    build:
+      context: ..
+      dockerfile: apps/notifications/Dockerfile
+    container_name: event-ticketing-notifications
+    environment:
+      PORT: 3004
+      DATABASE_URL: ${NOTIFICATIONS_DATABASE_URL}
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      KAFKA_CLIENT_ID: notifications-service
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD}
+      KAFKA_SASL_MECHANISM: SCRAM-SHA-256
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: event-ticketing-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in the root .env file}
+      AUTH_SERVICE_URL: http://auth:3001
+      EVENTS_SERVICE_URL: http://events:3002
+      TICKETS_SERVICE_URL: http://tickets:3003
+    depends_on:
+      auth:
+        condition: service_started
+      events:
+        condition: service_started
+      tickets:
+        condition: service_started
+
+volumes:
+  postgres_data:

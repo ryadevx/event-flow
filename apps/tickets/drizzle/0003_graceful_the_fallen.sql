@@ -1,0 +1,1 @@
+ALTER TABLE "idempotency_keys" ALTER COLUMN "ticket_id" DROP NOT NULL;
